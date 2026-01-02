@@ -2,6 +2,12 @@ import { Request, Response } from "express";
 import { prisma } from "./db";
 import { nanoid } from "nanoid";
 
+interface CreatePasteRequest {
+    content: string;
+    ttl_seconds?: number;
+    max_views?: number;
+}
+
 // Helper to escape HTML for safe rendering
 function escapeHtml(text: string): string {
     return text
@@ -38,7 +44,7 @@ export async function healthCheck(req: Request, res: Response) {
 
 export async function createPaste(req: Request, res: Response) {
     try {
-        const { content, ttl_seconds, max_views } = req.body;
+        const { content, ttl_seconds, max_views } : CreatePasteRequest = req.body;
 
         if (!content || typeof content !== 'string' || content.trim().length === 0) {
             res.status(400).json({ error: "Content is required and must be a non-empty string." });
@@ -47,22 +53,20 @@ export async function createPaste(req: Request, res: Response) {
 
         let ttlSeconds: number | null = null;
         if (ttl_seconds !== undefined && ttl_seconds !== null) {
-            const val = parseInt(ttl_seconds);
-            if (isNaN(val) || val < 1) {
+            if (typeof ttl_seconds !== 'number' || !Number.isInteger(ttl_seconds) || ttl_seconds < 1) {
                 res.status(400).json({ error: "ttl_seconds must be an integer >= 1" });
                 return;
             }
-            ttlSeconds = val;
+            ttlSeconds = ttl_seconds;
         }
 
         let maxViews: number | null = null;
         if (max_views !== undefined && max_views !== null) {
-            const val = parseInt(max_views);
-            if (isNaN(val) || val < 1) {
+            if (typeof max_views !== 'number' || !Number.isInteger(max_views) || max_views < 1) {
                 res.status(400).json({ error: "max_views must be an integer >= 1" });
                 return;
             }
-            maxViews = val;
+            maxViews = max_views;
         }
 
         const id = nanoid();
