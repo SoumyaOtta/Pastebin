@@ -7,11 +7,7 @@ import helmet from "helmet";
 const app = express();
 const port = process.env.PORT
 
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-test-now-ms"]
-}));
+app.use(cors());
 app.options('*', cors());
 
 app.use(helmet({
