@@ -101,14 +101,3 @@ Visit `http://localhost:3000`.
 ### 4. View Paste (HTML)
 - **Endpoint:** `GET /p/:id`
 - **Response:** `200 OK` (HTML content) or `404 Not Found`.
-
-## Persistence Layer
-We use **PostgreSQL** as the persistence layer, managed by **Prisma ORM**. This ensures data survives application restarts and provides robust constraints (like ACID compliance/transactions) for view counting and concurrency handling, which is critical for enforcing "Max Views" limits accurately.
-
-## Design Decisions
-- **Atomic Database Operations:** To enforce strict "Max Views" limits, we use atomic increments (`viewCount: { increment: 1 }`) in the database. This prevents race conditions where concurrent requests could bypass the limit.
-- **Server-Side Rendering for Strict Status Codes:** The View Paste page (`/p/:id`) is implemented as a Next.js Server Component. This allows us to return a genuine `404 Not Found` HTTP status code (via `notFound()`) when a paste is missing or expired, meeting robust compliance requirements.
-- **Security-First Architecture:** Implemented `helmet` for secure HTTP headers (XSS protection) and `express-rate-limit` (DDoS protection) to ensure the service is hardened against common attacks.
-- **Deterministic Time Testing:** The backend properly handles the `x-test-now-ms` header (when `TEST_MODE` is enabled) to allow automated tests to simulate "time travel" for instant verification of TTL expiry.
-- **Hybrid Rendering:** We use Server Components for data fetching (SEO, Status Codes) and Client Components for compute-heavy tasks like Syntax Highlighting, ensuring optimal performance.
-
